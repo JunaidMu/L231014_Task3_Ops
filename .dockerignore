@@ -1,0 +1,12 @@
+.astro
+.git
+.env
+airflow.db
+airflow.cfg
+logs/*
+unittests.cfg
+unittests.db
+Dockerfile.dockerignore
+docker-compose.yml
+docker-compose.override.yml
+*.pdf

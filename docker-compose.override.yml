@@ -1,0 +1,65 @@
+services:
+  # Primary Database: MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: currency_exchange_db
+    # b) Persistent Storage
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    # a) Docker Networking
+    networks:
+      - airflow
+    labels:
+      com.mlops.lab3.service: "mongodb"
+      com.mlops.lab3.role: "primary-database"
+      com.mlops.lab3.networking: "airflow"
+      com.mlops.lab3.storage: "persistent-volume"
+
+  # Web-based Administration Interface: Mongo Express
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo_express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    depends_on:
+      - mongodb
+    # a) Docker Networking
+    networks:
+      - airflow
+    labels:
+      com.mlops.lab3.service: "mongo-express"
+      com.mlops.lab3.role: "web-admin-interface"
+      com.mlops.lab3.networking: "airflow"
+
+# b) Persistent Storage Configuration
+volumes:
+  mongodb_data:
+    driver: local
+    labels:
+      com.mlops.lab3.volume: "mongodb-persistent-data"
+  mongodb_config:
+    driver: local
+    labels:
+      com.mlops.lab3.volume: "mongodb-persistent-config"
+
+# a) Docker Networking Configuration (shared with Astro CLI Airflow containers)
+networks:
+  airflow:
+    driver: bridge

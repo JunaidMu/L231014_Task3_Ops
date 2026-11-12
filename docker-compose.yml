@@ -1,0 +1,71 @@
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: lab-3-airflow-etl-pipeline/airflow:latest
+  restart: always
+  depends_on:
+    postgres:
+      condition: service_healthy
+  environment:
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@postgres:5432/postgres
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    - AIRFLOW__CORE__ENABLE_XCOM_PICKLING=True
+    - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+    - MONGO_URI=mongodb://admin:password@mongodb:27017/?authSource=admin
+    - MONGO_DB_NAME=currency_exchange_db
+    - MONGO_COLLECTION_NAME=exchange_rates
+  volumes:
+    - ./dags:/usr/local/airflow/dags:rw
+    - ./plugins:/usr/local/airflow/plugins:rw
+    - ./include:/usr/local/airflow/include:rw
+  networks:
+    - airflow
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: airflow_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - airflow
+
+  scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command:
+      - bash
+      - -c
+      - "airflow db migrate && exec airflow scheduler"
+
+  webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command:
+      - bash
+      - -c
+      - "airflow db migrate && airflow sync-perm --include-dags && (airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin || true) && airflow sync-perm --include-dags && exec airflow webserver"
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  airflow:
+    driver: bridge
