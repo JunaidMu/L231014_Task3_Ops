@@ -1,9 +1,9 @@
 # MLOps Lab 3 Report: Building Airflow ETL Pipeline (Frankfurter API to MongoDB)
 
-- **Student Name**: Muhammad Junaid
+- **Student Name**: Muhammad Junaid (L23-1014)
 - **Course**: MLOps (Semester 7)
 - **Lab**: Task 3 — Building Airflow ETL Pipeline using Astro CLI, Frankfurter API, MongoDB & Mongo Express
-- **GitHub / DagsHub Repository Link**: `[INSERT_YOUR_GITHUB_OR_DAGSHUB_REPO_URL_HERE]`
+- **GitHub Repository Link**: https://github.com/JunaidMu/L231014_Task3_Ops (Clone: `https://github.com/JunaidMu/L231014_Task3_Ops.git`)
 
 ---
 
